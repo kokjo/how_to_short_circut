@@ -1,0 +1,3 @@
+[submodule "tomu-bootloader"]
+	path = tomu-bootloader
+	url = git@github.com:kokjo/tomu-bootloader.git

@@ -5,6 +5,7 @@
 #include "toboot-api.h"
 #include "gpio.h"
 #include "leuart.h"
+#include "usart.h"
 
 #define RTC_INTERVAL_MSEC (1)
 #define EFM32_LFRCO_FREQ  (32768UL)
@@ -18,7 +19,7 @@ volatile int ms_ticks = 0;
 void RTC_Handler(void){
     // Clear interrupt flag
     RTC->IFC = RTC_IFC_COMP1 | RTC_IFC_COMP0 | RTC_IFC_OF;
-   
+
     // increment ticks
     ms_ticks++;
 }
@@ -43,7 +44,7 @@ void init_clocks(void){
 
     // Enable peripheral clocks(21MHz / 4, enable GPIO and ADC0).
     CMU->HFPERCLKDIV = CMU_HFPERCLKDIV_HFPERCLKEN | CMU_HFPERCLKDIV_HFPERCLKDIV_HFCLK4;
-    CMU->HFPERCLKEN0 = CMU_HFPERCLKEN0_GPIO | CMU_HFPERCLKEN0_ADC0;
+    CMU->HFPERCLKEN0 = CMU_HFPERCLKEN0_GPIO | CMU_HFPERCLKEN0_ADC0 | CMU_HFPERCLKEN0_USART1;
 
     // Enable RTC
     CMU->LFCLKSEL &= ~_CMU_LFCLKSEL_LFA_MASK;
@@ -73,19 +74,25 @@ static void init_rtc(void){
 void main(){
     int pe13_voltage = 0;
     init_clocks();
-    gpio_mode(GREEN, GPIO_MODE_WIREDAND);
-    gpio_set(GREEN);
+    // gpio_mode(GREEN, GPIO_MODE_WIREDAND);
+    // gpio_set(GREEN);
     init_leuart0();
     init_rtc();
-    
+    init_usart1();
+
     while(1){
-        pe13_voltage = adc_sample_ch1();
+        char cmd[] = {0x02, 0x00};
+        gpio_clr(USART_SS);
+        usart1_transfer(cmd, sizeof(cmd));
+        gpio_set(USART_SS);
+
+        // pe13_voltage = adc_sample_ch1();
         // Toggle Green LED
-        gpio_tgl(GREEN);
-        
-        // print some output 
-        leuart0_printf("ADC CH1: 0x%x\n", pe13_voltage);
-    
-        delay(pe13_voltage >> 2);
+        // gpio_tgl(GREEN);
+
+        // print some output
+        leuart0_printf("SPI DATA: %z\n", cmd, 2);
+
+        delay(1000);
     }
 }

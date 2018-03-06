@@ -23,7 +23,7 @@ void init_leuart0(){
     /* PB14 set as INPUTPULL and set pullup */
     gpio_mode(PB14, GPIO_MODE_INPUTPULL);
     gpio_set(PB14);
-    
+
     /* enable leuart0 */
     LEUART0->CMD = LEUART_CMD_RXEN | LEUART_CMD_TXEN;
 }
@@ -40,13 +40,14 @@ void leuart0_puts(char *s){
     leuart0_putchar('\n');
 }
 
-char hexchars[] = "0123456789abcdef";
+const char hexchars[] = "0123456789abcdef";
 
 void leuart0_printf(char *fmtstr, ...){
     va_list valist;
     int escape = 0;
-    char *str;
+    unsigned int i;
     unsigned int num;
+    unsigned char *str;
 
     va_start(valist, fmtstr);
     while(*fmtstr){
@@ -57,7 +58,7 @@ void leuart0_printf(char *fmtstr, ...){
                     leuart0_putchar('%');
                     break;
                 case 's':
-                    str = va_arg(valist, char *);
+                    str = va_arg(valist, unsigned char *);
                     while(*str) leuart0_putchar(*str++);
                     break;
                 case 'p':
@@ -74,11 +75,18 @@ void leuart0_printf(char *fmtstr, ...){
                     leuart0_putchar(hexchars[(num >> 4) & 0xf]);
                     leuart0_putchar(hexchars[(num >> 0) & 0xf]);
                     break;
+                case 'z':
+                    str = va_arg(valist, unsigned char *);
+                    num = va_arg(valist, unsigned int);
+                    for (i = 0; i < num; i++) {
+                        leuart0_putchar(hexchars[(str[i] >> 4) & 0xf]);
+                        leuart0_putchar(hexchars[str[i] & 0xf]);
+                    }
             }
         } else if(*fmtstr == '%'){
             escape = 1;
         } else {
-            leuart0_putchar(*fmtstr); 
+            leuart0_putchar(*fmtstr);
         }
         fmtstr++;
     }

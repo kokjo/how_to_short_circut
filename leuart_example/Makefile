@@ -1,6 +1,6 @@
 PACKAGE    = leuart_example
 ADD_CFLAGS = -Wno-main -Iinclude -DEFM32HG309F64=1
-ADD_LFLAGS = 
+ADD_LFLAGS =
 
 TRGT      ?= arm-none-eabi-
 CC         = $(TRGT)gcc
@@ -23,7 +23,7 @@ LFLAGS     = $(ADD_LFLAGS) $(CFLAGS) \
 
 OBJ_DIR    = .obj
 
-CSOURCES   = main.c vectors.c reset_handler.c gpio.c leuart.c adc.c
+CSOURCES   = main.c vectors.c reset_handler.c gpio.c leuart.c adc.c usart.c
 CPPSOURCES = $(wildcard *.cpp)
 ASOURCES   = $(wildcard *.S)
 COBJS      = $(addprefix $(OBJ_DIR)/, $(notdir $(CSOURCES:.c=.o)))

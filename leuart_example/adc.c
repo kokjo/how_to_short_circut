@@ -1,0 +1,8 @@
+#include "em_device.h"
+
+int adc_sample_ch1(){
+    ADC0->SINGLECTRL = ADC_SINGLECTRL_INPUTSEL_CH1 | ADC_SINGLECTRL_REF_VDD;
+    ADC0->CMD |= ADC_CMD_SINGLESTART;
+    while(!(ADC0->STATUS & ADC_STATUS_SINGLEDV)){ } // WAIT
+    return ADC0->SINGLEDATA;
+}

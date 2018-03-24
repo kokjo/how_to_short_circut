@@ -4,6 +4,26 @@
 void init_leuart0();
 void leuart0_putchar(char ch);
 void leuart0_puts(char *s);
-void leuart0_printf(char *fmtstr, ...);
+void leuart0_printf(const char *fmtstr, ...);
+
+#define LEUART0_LOCATION (LEUART_ROUTE_LOCATION_LOC4)
+#define LEUART0_ENABLE_RX 0
+#define LEUART0_ENABLE_TX 1
+
+#if LEUART0_LOCATION == LEUART_ROUTE_LOCATION_LOC1
+    #define LEUART0_RX (PB14)
+    #define LEUART0_TX (PB13)
+#elif LEUART0_LOCATION == LEUART_ROUTE_LOCATION_LOC3
+    #define LEUART0_RX (PF1)
+    #define LEUART0_TX (PF0)
+#elif LEUART0_LOCATION == LEUART_ROUTE_LOCATION_LOC4
+    #define LEUART0_RX (PA0)
+    #define LEUART0_TX (PF2)
+#elif LEUART0_LOCATION == LEUART_ROUTE_LOCATION_LOC5
+    #define LEUART0_RX (PC15)
+    #define LEUART0_TX (PC14)
+#else
+    #error "Fix leuart.h"
+#endif
 
 #endif

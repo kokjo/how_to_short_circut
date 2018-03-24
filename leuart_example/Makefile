@@ -1,5 +1,5 @@
 PACKAGE    = leuart_example
-ADD_CFLAGS = -Wno-main -Iinclude -DEFM32HG309F64=1
+ADD_CFLAGS = -Wno-main -Iinclude
 ADD_LFLAGS =
 
 TRGT      ?= arm-none-eabi-
@@ -23,7 +23,7 @@ LFLAGS     = $(ADD_LFLAGS) $(CFLAGS) \
 
 OBJ_DIR    = .obj
 
-CSOURCES   = main.c vectors.c reset_handler.c gpio.c leuart.c adc.c usart.c
+CSOURCES   = main.c vectors.c reset_handler.c gpio.c leuart.c usart.c rfm95.c printf.c
 CPPSOURCES = $(wildcard *.cpp)
 ASOURCES   = $(wildcard *.S)
 COBJS      = $(addprefix $(OBJ_DIR)/, $(notdir $(CSOURCES:.c=.o)))
@@ -45,10 +45,14 @@ $(OBJECTS): | $(OBJ_DIR)
 $(TARGET): $(OBJECTS) $(LDSCRIPT)
 	$(QUIET) echo "  LD       $@"
 	$(QUIET) $(CXX) $(OBJECTS) $(LFLAGS) -o $@
+
+$(PACKAGE).bin: $(TARGET)
 	$(QUIET) echo "  OBJCOPY  $(PACKAGE).bin"
-	$(QUIET) $(OBJCOPY) -O binary $@ $(PACKAGE).bin
+	$(QUIET) $(OBJCOPY) -O binary $(TARGET) $(PACKAGE).bin
+
+$(PACKAGE).ihex: $(TARGET)
 	$(QUIET) echo "  IHEX     $(PACKAGE).ihex"
-	$(QUIET) $(OBJCOPY) -O ihex $@ $(PACKAGE).ihex
+	$(QUIET) $(OBJCOPY) -O ihex $(TARGET) $(PACKAGE).ihex
 
 $(DEBUG): CFLAGS += $(DBG_CFLAGS)
 $(DEBUG): LFLAGS += $(DBG_LFLAGS)
@@ -77,5 +81,8 @@ $(CLEAN):
 	$(QUIET) rm -f $(wildcard $(OBJ_DIR)/*.d)
 	$(QUIET) rm -f $(wildcard $(OBJ_DIR)/*.o)
 	$(QUIET) rm -f $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol $(PACKAGE).ihex
+
+flash: $(PACKAGE).bin
+	dfu-util -d 1209:70b1 -D $(PACKAGE).bin
 
 include $(wildcard $(OBJ_DIR)/*.d)

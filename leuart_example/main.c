@@ -1,11 +1,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "mcu.h"
+
 #include "em_device.h"
 #include "toboot-api.h"
 #include "gpio.h"
 #include "leuart.h"
 #include "usart.h"
+#include "rfm95.h"
 
 #define RTC_INTERVAL_MSEC (1)
 #define EFM32_LFRCO_FREQ  (32768UL)
@@ -26,7 +29,7 @@ void RTC_Handler(void){
 
 void delay(int ms){
     int start = ms_ticks;
-    while(ms_ticks - start < ms) asm("wfi");
+    while(ms_ticks - start < ms);
 }
 
 void init_clocks(void){
@@ -40,11 +43,13 @@ void init_clocks(void){
 
     // Set HFRCO freq 21 MHz, and use calibration
     CMU->HFRCOCTRL = (4 << 8) | (DEVINFO->HFRCOCAL1 & 0xff << 0);
-    CMU->HFCORECLKEN0 |= CMU_HFCORECLKEN0_LE;
+
+    // Set core clock to 21MHz / 2
+    CMU->HFCORECLKDIV = CMU_HFCORECLKDIV_HFCORECLKLEDIV_DIV4;
 
     // Enable peripheral clocks(21MHz / 4, enable GPIO and ADC0).
     CMU->HFPERCLKDIV = CMU_HFPERCLKDIV_HFPERCLKEN | CMU_HFPERCLKDIV_HFPERCLKDIV_HFCLK4;
-    CMU->HFPERCLKEN0 = CMU_HFPERCLKEN0_GPIO | CMU_HFPERCLKEN0_ADC0 | CMU_HFPERCLKEN0_USART1;
+    CMU->HFPERCLKEN0 = CMU_HFPERCLKEN0_GPIO | CMU_HFPERCLKEN0_ADC0 | CMU_HFPERCLKEN0_USART0;
 
     // Enable RTC
     CMU->LFCLKSEL &= ~_CMU_LFCLKSEL_LFA_MASK;
@@ -72,26 +77,14 @@ static void init_rtc(void){
 }
 
 void main(){
-    int pe13_voltage = 0;
     init_clocks();
-    // gpio_mode(GREEN, GPIO_MODE_WIREDAND);
-    // gpio_set(GREEN);
     init_leuart0();
     init_rtc();
-    init_usart1();
+    usart0_init();
+    rfm95_init();
 
     while(1){
-        char cmd[] = {0x02, 0x00};
-        gpio_clr(USART_SS);
-        usart1_transfer(cmd, sizeof(cmd));
-        gpio_set(USART_SS);
-
-        // pe13_voltage = adc_sample_ch1();
-        // Toggle Green LED
-        // gpio_tgl(GREEN);
-
-        // print some output
-        leuart0_printf("SPI DATA: %z\n", cmd, 2);
+        rfm95_dump_regs();
 
         delay(1000);
     }

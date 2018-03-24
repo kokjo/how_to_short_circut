@@ -1,8 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-//#include "mcu.h"
-#include "em_device.h"
+#include "mcu.h"
 #include "toboot-api.h"
 
 // Configure Toboot by identifying this as a V2 header.

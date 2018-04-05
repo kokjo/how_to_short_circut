@@ -76,35 +76,17 @@ void set_field(uint8_t reg, uint8_t mask, uint8_t value) {
     rfm95_write_reg(reg, (rfm95_read_reg(reg) & ~mask) | value);
 }
 
-uint8_t rfm95_mode() {
+uint8_t rfm95_mode_get() {
     return rfm95_read_reg(RFM95_OPMODE) & RFM95_OPMODE_MODE_MASK;
 }
 
+void rfm95_mode_set(uint8_t mode) {
+    set_field(RFM95_OPMODE, RFM95_OPMODE_MODE_MASK, mode);
+}
+
 void rfm95_wait_tx() {
-    if (rfm95_mode() == RFM95_OPMODE_TX)
+    if (rfm95_mode_get() == RFM95_OPMODE_TX)
         while(rfm95_read_reg(RFM95_IRQ) & RFM95_IRQ_TX_DONE);
-}
-
-
-void rfm95_mode_stdby() {
-    set_field(
-        RFM95_OPMODE,
-        RFM95_OPMODE_MODE_MASK,
-        RFM95_OPMODE_STANDBY);
-}
-
-void rfm95_mode_tx() {
-    set_field(
-        RFM95_OPMODE,
-        RFM95_OPMODE_MODE_MASK,
-        RFM95_OPMODE_TX);
-}
-
-void rfm95_mode_rx() {
-    set_field(
-        RFM95_OPMODE,
-        RFM95_OPMODE_MODE_MASK,
-        RFM95_OPMODE_RX);
 }
 
 void rfm95_send(const uint8_t* data, uint8_t len) {
@@ -112,16 +94,16 @@ void rfm95_send(const uint8_t* data, uint8_t len) {
     // wait for transmission of old packet
 
     rfm95_wait_tx();
-    rfm95_mode_stdby();
+    rfm95_mode_set(RFM95_OPMODE_STANDBY);
 
     // write packet
 
-    rfm95_write_memory(RFM95_FIFO_ADDR, data, len);
+    rfm95_write_memory(0, data, len);
     rfm95_write_reg(RFM95_PAYLOAD_LENGTH, len);
 
     // transmit new packet
 
-    rfm95_mode_tx();
+    rfm95_mode_set(RFM95_OPMODE_TX);
 }
 
 int rfm95_packet_available() {
@@ -131,7 +113,7 @@ int rfm95_packet_available() {
 
     // TODO: try-hard, be good
 
-    switch(rfm95_mode()) {
+    switch(rfm95_mode_get()) {
         case RFM95_OPMODE_RX:
             if (irq & RFM95_IRQ_RX_DONE) {
                 len  = rfm95_read_reg(RFM95_RX_BYTES);
@@ -152,7 +134,7 @@ int rfm95_packet_available() {
 
 uint8_t rfm95_recv(uint8_t* buf, uint8_t max_len) {
 
-    rfm95_mode_rx();
+    rfm95_mode_set(RFM95_OPMODE_RX);
 
     while(!rfm95_packet_available());
 
@@ -169,12 +151,9 @@ void rfm95_init(){
 
     // enter LoRa mode
 
-    set_field(
-        RFM95_OPMODE,
-        RFM95_OPMODE_MODE_MASK,
-        RFM95_OPMODE_SLEEP);
+    rfm95_mode_set(RFM95_OPMODE_SLEEP);
 
-    while((rfm95_read_reg(RFM95_OPMODE) & RFM95_OPMODE_MODE_MASK) != RFM95_OPMODE_SLEEP);
+    while(rfm95_mode_get() != RFM95_OPMODE_SLEEP);
 
     set_field(
         RFM95_OPMODE,
@@ -186,27 +165,24 @@ void rfm95_init(){
     rfm95_write_reg(RFM95_RXBASE, 0);
     rfm95_write_reg(RFM95_TXBASE, 0);
 
-    // go to stdby mode
-
-    rfm95_mode_stdby();
-
     // set preample size : default = 8
 
+    rfm95_mode_set(RFM95_OPMODE_STANDBY);
     rfm95_write_reg(RFM95_PREAMBLE_MSB, 0);
     rfm95_write_reg(RFM95_PREAMBLE_LSB, 8);
 
     // set frequency
 
-    rfm95_set_freq(434);
+    rfm95_set_freq(868000000);
 
-    while(1) {
-        rfm95_dump_regs();
-        delay(1000);
-    }
+    uint32_t cnt = 0;
 
     while(1) {
         // rfm95_recv(NULL, 0);
-        char* lolz = "AAAAAAAAAAAAAAA";
-        rfm95_send(lolz, strlen(lolz));
+        uint32_t v = cnt;
+        rfm95_send(&v, sizeof(v));
+        cnt++;
+        delay(1000);
+        rfm95_dump_regs();
     }
 }

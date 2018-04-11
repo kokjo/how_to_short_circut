@@ -27,6 +27,8 @@ reg_names = {
     0x22: "REG_PAYLOAD_LENGTH",
 }
 
+OPMODE_LORA = 0x80
+
 OPMODE_MODE_SLEEP = 0
 OPMODE_MODE_STDBY = 1
 OPMODE_MODE_FS_TX = 2
@@ -146,13 +148,14 @@ class RFM95:
         self.write_memory(0, data)
         self.write_reg(REG_TXBASE, 0)
         self.write_reg(REG_PAYLOAD_LENGTH, len(data))
-        self.write_reg(REG_OPMODE, (1 << 7) | 3)
+        self.write_reg(REG_OPMODE, OPMODE_LORA | OPMODE_MODE_TX)
 
     def recv_packet(self, freq, bw, cr, sf):
         self.write_freq(freq)
         self.write_reg(REG_MODEMCONFIG1, bw | cr)
         self.write_reg(REG_MODEMCONFIG2, sf)
         self.write_reg(REG_PACONFIG, 0x83)
-        self.write_reg(REG_OPMODE, (1 << 7) | OPMODE_MODE_RX)
+        self.write_reg(REG_RXBASE, 0)
+        self.write_reg(REG_OPMODE, OPMODE_LORA | OPMODE_MODE_RX)
 
     

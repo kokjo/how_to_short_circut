@@ -18,8 +18,8 @@ void init_leuart0(){
     LEUART0->ROUTE = LEUART0_LOCATION;
     if(LEUART0_ENABLE_RX) LEUART0->ROUTE |= LEUART_ROUTE_RXPEN;
     if(LEUART0_ENABLE_TX) LEUART0->ROUTE |= LEUART_ROUTE_TXPEN;
-    LEUART0->CMD = LEUART_CMD_CLEARRX | LEUART_CMD_CLEARTX;
-    LEUART0->CTRL = LEUART_CTRL_STOPBITS_TWO;
+    LEUART0->CMD = LEUART_CMD_CLEARRX | LEUART_CMD_CLEARTX | LEUART_CMD_RXBLOCKDIS;
+    LEUART0->CTRL = LEUART_CTRL_STOPBITS_TWO | LEUART_CTRL_DATABITS_EIGHT;
 
     /* TX set as PUSHPULL */
     gpio_mode(LEUART0_TX, GPIO_MODE_PUSHPULL);
@@ -37,6 +37,14 @@ void _leuart0_out(struct output *o, char ch){
     o = o;
     while(!(LEUART0->STATUS & LEUART_STATUS_TXBL)){ }; // WAIT
     LEUART0->TXDATA = ((uint32_t)ch) & 0xffUL;
+}
+
+char leuart0_getchar(){
+    LEUART0->CMD = LEUART_CMD_RXEN;
+    while(!(LEUART0->STATUS & LEUART_STATUS_RXDATAV)) {
+        // WAIT
+    };
+    return (char)(LEUART0->RXDATA & 0xffUL);
 }
 
 void leuart0_putchar(char ch){

@@ -3,11 +3,12 @@
 
 void init_leuart0();
 void leuart0_putchar(char ch);
+char leuart0_getchar();
 void leuart0_puts(char *s);
 void leuart0_printf(const char *fmtstr, ...);
 
-#define LEUART0_LOCATION (LEUART_ROUTE_LOCATION_LOC4)
-#define LEUART0_ENABLE_RX 0
+#define LEUART0_LOCATION (LEUART_ROUTE_LOCATION_LOC3)
+#define LEUART0_ENABLE_RX 1
 #define LEUART0_ENABLE_TX 1
 
 #if LEUART0_LOCATION == LEUART_ROUTE_LOCATION_LOC1

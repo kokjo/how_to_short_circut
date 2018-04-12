@@ -73,7 +73,7 @@ void main(){
         for (int n = 0; n < 256; n++)
             msg[n] = 0;
 
-        sprintf(msg, "HELLO LoRa %x\n", i);
+        sprintf(msg, "HELLO LoRa %hhx\n", (uint8_t) (i & 0xff) );
         leuart0_printf(msg);
         rfm95_send(&conf, (uint8_t*) msg, 16);
 #endif

@@ -157,6 +157,8 @@ void rfm95_read_memory(struct rfm95_t *c, uint8_t addr, uint8_t *data, size_t le
 #define RFM95_PARAMP_12US             (0x0e)
 #define RFM95_PARAMP_10US             (0x0f)
 
+#define RFM95_SYNCWORD (0x39)
+
 #define RFM95_OCP_OCP_ON              (1 << 5)
 #define RFM95_OCP_OCP_TRIM(x)         (((x) & 0xf) << 0)
 

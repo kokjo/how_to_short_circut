@@ -86,6 +86,10 @@ void rfm95_update_config(struct rfm95_t *c) {
     rfm95_write_reg(c, RFM95_PACONFIG, 0xf2);
     rfm95_write_reg(c, RFM95_PARAMP, 0x08);
 
+    // sync word
+
+    rfm95_write_reg(c, RFM95_SYNCWORD, 0x12);
+
 }
 
 void rfm95_send(struct rfm95_t *c, uint8_t* msg, uint8_t len) {

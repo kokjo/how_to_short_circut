@@ -10,17 +10,18 @@
 #include "leuart.h"
 #include "usart.h"
 
+#include "rfm95.h"
+#include "printf.h"
+
 #define GREEN PB7
 #define RED PA0
 
 #define SS_PIN  (PB11)
 #define RST_PIN (PB14)
 
-void main(){
-    char ch;
-    int num = 0;
-    uint8_t data = 0;
+#define RECV (1)
 
+void main(){
     gpio_mode(SS_PIN, GPIO_MODE_PUSHPULL);
     gpio_set(SS_PIN);
     gpio_mode(RST_PIN, GPIO_MODE_PUSHPULL);
@@ -29,36 +30,54 @@ void main(){
     delay(1000);
     leuart0_printf("EFM32HG309 SPI LEUART BRIDGE\n");
 
-    while(1){
-        ch = leuart0_getchar();
-        switch(ch){
-            case '?':
-                leuart0_printf("EFM32HG309 SPI LEUART BRIDGE\n");
-                num = 0;
-                data = 0;
-                break;
-            case '/':  gpio_set(SS_PIN);  break;
-            case '\\': gpio_clr(SS_PIN);  break;
-            case 'R':  gpio_set(RST_PIN); break;
-            case 'r':  gpio_clr(RST_PIN); break;
-            default:
-                if('0' <= ch && ch <= '9'){
-                    data = (data << 4) | ((ch - '0') + 0x0);
-                    num++;
-                }
-                if('a' <= ch && ch <= 'f'){
-                    data = (data << 4) | ((ch - 'a') + 0xa);
-                    num++;
-                }
-                if('A' <= ch && ch <= 'F'){
-                    data = (data << 4) | ((ch - 'A') + 0xa);
-                    num++;
-                }
-                if(num == 2){
-                    data = usart0_transfer_byte(data);
-                    num = 0;
-                    leuart0_printf("%hhx",data);
-                }
+    struct rfm95_t conf;
+
+    conf.freq = 868000000;
+    conf.bw = MC1_BW_125kHz;
+    conf.cr = MC1_CR_45;
+    conf.sf = MC2_SF_128;
+
+    conf.pin_ss = SS_PIN;
+    conf.pin_rst = RST_PIN;
+
+    char msg[256];
+
+    for (unsigned int i = 0; i < 10000; i++) {
+
+        rfm95_update_config(&conf);
+
+        // dump regs
+
+        /*
+        for (unsigned int n = 0; n < 0xf7; n++) {
+            for (int n = 0; n < 256; n++)
+                msg[n] = 0;
+            sprintf(msg, "reg[%hhx] = %hhx\n", n, rfm95_read_reg(&conf, n));
+            leuart0_printf(msg);
         }
+        */
+
+#ifdef RECV
+
+        // dump memory
+
+        for (int n = 0; n < 256; n++)
+            msg[n] = 0;
+
+        rfm95_recv(&conf, (uint8_t*) msg);
+        rfm95_read_memory(&conf, 0, (uint8_t*) msg, 16);
+        leuart0_printf(msg);
+        leuart0_printf("\n");
+
+#else
+        for (int n = 0; n < 256; n++)
+            msg[n] = 0;
+
+        sprintf(msg, "HELLO LoRa %x\n", i);
+        leuart0_printf(msg);
+        rfm95_send(&conf, (uint8_t*) msg, 16);
+#endif
+
+        delay(2000);
     }
 }

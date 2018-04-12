@@ -1,8 +1,9 @@
 #ifndef _PRINTF_H_
 #define _PRINTF_H_
 
-#define ENABLE_PERCENT_D (1)
+#include <stdarg.h>
 
+#define ENABLE_PERCENT_D (1)
 
 struct output {
     void (*out)(struct output *, char);

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdarg.h>
+
 #include "printf.h"
 
 const char hexchars[] = "0123456789ABCDEF    ";
@@ -29,7 +30,7 @@ void va_printf(struct output *out, char const *fmtstr, va_list va){
                     for(i = 0; str[i]; i++) out->out(out, str[i]);
                     break;
                 case 'h':
-                    size = size >> 1; 
+                    size = size >> 1;
                     escape = 1;
                     break;
                 case 'p':
@@ -74,7 +75,7 @@ void va_printf(struct output *out, char const *fmtstr, va_list va){
                         out->out(out, hexchars[(str[i] >> 0) & 0xf]);
                     }
                     break;
-#endif 
+#endif
             }
         } else if(*fmtstr == '%'){
             escape = 1;

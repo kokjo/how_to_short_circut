@@ -5,3 +5,4 @@
 *.d
 *.bin
 *.pyc
+*.gdb_history

@@ -30,9 +30,12 @@ if __name__ == '__main__':
     rfm95.reset()
     rfm95.write_reg(REG_OPMODE, (1 << 7))
     # rfm95_dump_regs()
+    rfm95.write_memory(0xff, 'B')
     rfm95.write_memory(0, 'A' * 16)
-    rfm95.recv_packet(868000000, MC1_BW_125kHz, MC1_CR_45, MC2_SF_128)
+
     for n in range(0, 100000000):
+        rfm95.recv_packet(868000000, MC1_BW_125kHz, MC1_CR_45, MC2_SF_128)
         mem  = rfm95.read_memory(0, 16)
         mode = rfm95.read_reg(REG_OPMODE)
         print n, mem, mode_names[mode & ((1 << 3) - 1)]
+        assert rfm95.read_memory(0xff, 1) == 'B'

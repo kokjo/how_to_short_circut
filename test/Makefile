@@ -74,6 +74,7 @@ $(CLEAN):
 	$(QUIET) rm -f $(wildcard $(OBJ_DIR)/*.d)
 	$(QUIET) rm -f $(wildcard $(OBJ_DIR)/*.o)
 	$(QUIET) rm -f $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol $(PACKAGE).ihex
+	$(QUIET) rm -rf $(OBJ_DIR)
 
 flash: $(PACKAGE).bin
 	dfu-util -d 1209:70b1 -D $(PACKAGE).bin

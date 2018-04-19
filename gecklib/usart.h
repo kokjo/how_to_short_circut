@@ -4,12 +4,11 @@
 #include <stdint.h>
 
 #include "mcu.h"
+#include "config.h"
 
 void init_usart0();
 uint8_t usart0_transfer_byte(uint8_t data);
 void usart0_transfer(uint8_t* ch, size_t len);
-
-#define USART0_LOCATION USART_ROUTE_LOCATION_LOC4
 
 #if USART0_LOCATION == USART_ROUTE_LOCATION_LOC3
     #define USART0_CLK  (PC15)

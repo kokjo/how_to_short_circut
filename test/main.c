@@ -17,9 +17,9 @@
 #define RED PA0
 
 #define SS_PIN  (PB11)
-#define RST_PIN (PB14)
+#define RST_PIN (PC1)
 
-#define RECV (1)
+// #define RECV (1)
 
 void main(){
     gpio_mode(SS_PIN, GPIO_MODE_PUSHPULL);

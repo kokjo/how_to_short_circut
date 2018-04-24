@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #define ENABLE_PERCENT_D (1)
+#define ENABLE_PERCENT_Z (1)
 
 struct output {
     void (*out)(struct output *, char);

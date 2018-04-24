@@ -69,8 +69,8 @@ void va_printf(struct output *out, char const *fmtstr, va_list va){
 #if ENABLE_PERCENT_Z
                 case 'z':
                     str = va_arg(va, unsigned char *);
-                    size = va_arg(va, unsigned int);
-                    for (i = 0; i < size; i++) {
+                    unsigned int len = va_arg(va, unsigned int);
+                    for (i = 0; i < len; i++) {
                         out->out(out, hexchars[(str[i] >> 4) & 0xf]);
                         out->out(out, hexchars[(str[i] >> 0) & 0xf]);
                     }

@@ -3,8 +3,8 @@
 
 #include <stdarg.h>
 
-#define ENABLE_PERCENT_D (1)
-#define ENABLE_PERCENT_Z (1)
+#define ENABLE_PERCENT_D
+#define ENABLE_PERCENT_Z
 
 struct output {
     void (*out)(struct output *, char);

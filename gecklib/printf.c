@@ -9,12 +9,12 @@ const char hexchars[] = "0123456789ABCDEF    ";
 
 void va_printf(struct output *out, char const *fmtstr, va_list va){
     int escape = 0;
-    int size = 0;
+    unsigned int size = 0;
     unsigned int i;
     unsigned int num;
     unsigned char *str;
 
-#if ENABLE_PERCENT_D
+#ifdef ENABLE_PERCENT_D
     char digit_buffer[16];
 #endif
 
@@ -53,20 +53,20 @@ void va_printf(struct output *out, char const *fmtstr, va_list va){
                     out->out(out, hexchars[(num >> 4) & 0xf]);
                     out->out(out, hexchars[(num >> 0) & 0xf]);
                     break;
-#if ENABLE_PERCENT_D
+#ifdef ENABLE_PERCENT_D
                 case 'd':
                     num = va_arg(va, unsigned int);
                     i = 0;
-                    while(num){
+                    do{
                         digit_buffer[i++] = '0' + (num % 10);
                         num = num / 10;
-                    }
-                    do{
+                    } while(num);
+                    while(i--){
                         out->out(out, digit_buffer[i]);
-                    } while(i--);
+                    }
                     break;
 #endif
-#if ENABLE_PERCENT_Z
+#ifdef ENABLE_PERCENT_Z
                 case 'z':
                     str = va_arg(va, unsigned char *);
                     unsigned int len = va_arg(va, unsigned int);

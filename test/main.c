@@ -19,7 +19,7 @@
 #define SS_PIN  (PB11)
 #define RST_PIN (PC1)
 
-// #define RECV (1)
+#define RECV
 
 void main(){
     gpio_mode(SS_PIN, GPIO_MODE_PUSHPULL);
@@ -66,8 +66,7 @@ void main(){
 
         rfm95_recv(&conf, (uint8_t*) msg);
         rfm95_read_memory(&conf, 0, (uint8_t*) msg, 16);
-        leuart0_printf(msg);
-        leuart0_printf("\n");
+        leuart0_printf("MSG: %z\n", msg, 16);
 
 #else
         for (int n = 0; n < 256; n++)
